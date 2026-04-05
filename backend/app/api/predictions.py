@@ -23,12 +23,14 @@ class PredictRequest(BaseModel):
 class ZonePrediction(BaseModel):
     zone_id:    str
     zone_name:  str
+    lat:        float
+    lng:        float
     demand:     int
     predicted:  int
     delta:      int
     delta_pct:  float
     confidence: float
-    tier:       str   # high / medium / low
+    tier:       str # high / medium / low
 
 
 class PredictResponse(BaseModel):
@@ -44,14 +46,39 @@ async def predict_latest(
     session: AsyncSession = Depends(get_session),
 ):
     predictor = get_predictor()
-    result    = predictor.predict(city_id)
+    result = predictor.predict(city_id)
+
+    # 🔥 Fetch zones from DB
+    stmt = select(Zone).where(Zone.city_id == city_id)
+    zones = (await session.execute(stmt)).scalars().all()
+
+    zone_map = {z.id: z for z in zones}
+
+    # 🔥 Inject lat/lng
+    for p in result["predictions"]:
+        zone = zone_map.get(p["zone_id"])
+        if zone:
+            p["lat"] = zone.lat
+            p["lng"] = zone.lng
+
     return result
 
 
 @router.post("/", response_model=PredictResponse)
 async def predict(req: PredictRequest, session: AsyncSession = Depends(get_session)):
     predictor = get_predictor()
-    result    = predictor.predict(req.city_id, req.zone_ids)
+    result = predictor.predict(req.city_id, req.zone_ids)
+
+    stmt = select(Zone).where(Zone.city_id == req.city_id)
+    zones = (await session.execute(stmt)).scalars().all()
+    zone_map = {z.id: z for z in zones}
+
+    for p in result["predictions"]:
+        zone = zone_map.get(p["zone_id"])
+        if zone:
+            p["lat"] = zone.lat
+            p["lng"] = zone.lng
+
     return result
 
 

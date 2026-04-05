@@ -29,20 +29,20 @@ export const useStore = create((set, get) => ({
   },
 
   // ── Demand state ──────────────────────────────────────────────────────────
-  demandData:    {},   // { zoneId: number }
+  demandData:    {},
   prevDemand:    {},
-  history:       {},   // { zoneId: number[] }
-  futurePreds:   {},   // { zoneId: number[] }
+  history:       {},
+  futurePreds:   {},
   simStep:       0,
-  timeSlot:      16,   // 0–47 (30-min slots, 16 = 08:00)
+  timeSlot:      16,
   isLive:        true,
   horizon:       'live',
   viewMode:      'demand',
 
   // ── UI state ──────────────────────────────────────────────────────────────
   selectedZoneId:   null,
-  activeTab:        'overview',  // overview | zone | model | cities
-  detailTab:        'forecast',  // forecast | actual | alerts
+  activeTab:        'landing',  // ✅ CHANGED: default landing page
+  detailTab:        'forecast',
   filters:          new Set(),
   sortBy:           'demand',
   insightsOpen:     true,
@@ -53,7 +53,7 @@ export const useStore = create((set, get) => ({
   alerts:      JSON.parse(localStorage.getItem('mobility_alerts') || '[]'),
   activeToasts: [],
 
-  // ── Model metrics (simulated, updated per tick) ───────────────────────────
+  // ── Model metrics ─────────────────────────────────────────────────────────
   metrics: { mae: 3.21, rmse: 4.87, mape: 8.4, trend: 'improving' },
 
   // ── Actions ───────────────────────────────────────────────────────────────
@@ -74,15 +74,12 @@ export const useStore = create((set, get) => ({
       newFuture[z.id] = getFuturePredictions(z, hour)
     })
 
-    // Advance time slot
     const nextSlot = (timeSlot + 1) % 48
 
-    // Metrics simulation
     const mae  = +(3.2 + Math.sin(newStep * 0.09) * 0.5).toFixed(2)
     const rmse = +(4.9 + Math.sin(newStep * 0.07) * 0.7).toFixed(2)
     const mape = +(8.4 + Math.sin(newStep * 0.06) * 1.3).toFixed(1)
 
-    // Check alerts
     const toasts = []
     alerts.forEach(a => {
       const d    = newData[a.zid] || 0
@@ -109,6 +106,10 @@ export const useStore = create((set, get) => ({
       activeToasts: toasts.length ? [...get().activeToasts, ...toasts].slice(-4) : get().activeToasts,
     })
   },
+
+  // 👉 NAVIGATION CONTROL (NEW)
+  goToApp: () => set({ activeTab: 'overview' }),
+  goToLanding: () => set({ activeTab: 'landing' }),
 
   setTimeSlot:  (v) => set({ timeSlot: v }),
   setLive:      (v) => set({ isLive: v }),

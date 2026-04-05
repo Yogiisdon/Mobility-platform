@@ -22,22 +22,50 @@
 @layer components {
   /* Leaflet overrides */
   .leaflet-container { background: #050810 !important; }
-  .leaflet-tile { filter: brightness(.28) saturate(.25) hue-rotate(190deg); }
+
+  .leaflet-tile {
+    filter: brightness(.28) saturate(.25) hue-rotate(190deg);
+  }
+
+  /* ✅ FIXED POPUP */
   .leaflet-popup-content-wrapper {
     background: #141928 !important;
     border: 1px solid #1e2540 !important;
     border-radius: 10px !important;
     box-shadow: 0 8px 32px rgba(0,0,0,.7) !important;
     padding: 0 !important;
+
+    max-width: 200px !important; /* 🔑 prevents expansion */
   }
-  .leaflet-popup-tip { background: #141928 !important; }
-  .leaflet-popup-content { margin: 0 !important; }
+
+  .leaflet-popup-content {
+    margin: 0 !important;
+    padding: 10px !important;
+
+    max-width: 180px;           /* 🔑 constrain inner content */
+    white-space: normal;        /* 🔑 allow wrapping */
+    word-break: break-word;     /* 🔑 prevent overflow */
+    overflow: hidden;           /* 🔑 clip excess */
+  }
+
+  /* 🔑 critical fix for flex overflow inside popup */
+  .leaflet-popup-content * {
+    min-width: 0;
+  }
+
+  .leaflet-popup-tip {
+    background: #141928 !important;
+  }
+
   .leaflet-control-zoom a {
     background: #141928 !important;
     color: #5a6080 !important;
     border-color: #1e2540 !important;
   }
-  .leaflet-control-zoom a:hover { color: #00d4aa !important; }
+
+  .leaflet-control-zoom a:hover {
+    color: #00d4aa !important;
+  }
 
   /* Chart.js canvas sharpness */
   canvas { image-rendering: crisp-edges; }
@@ -47,25 +75,32 @@
     -webkit-appearance: none;
     background: transparent;
   }
+
   input[type=range]::-webkit-slider-track {
     height: 3px;
     background: #1e2540;
     border-radius: 2px;
   }
+
   input[type=range]::-webkit-slider-thumb {
     -webkit-appearance: none;
-    width: 13px; height: 13px;
+    width: 13px;
+    height: 13px;
     border-radius: 50%;
     background: #7c6ef5;
     cursor: pointer;
     margin-top: -5px;
     transition: transform .15s;
   }
-  input[type=range]::-webkit-slider-thumb:hover { transform: scale(1.2); }
+
+  input[type=range]::-webkit-slider-thumb:hover {
+    transform: scale(1.2);
+  }
 
   /* Glow effects */
   .glow-accent { box-shadow: 0 0 12px rgba(0,212,170,.25); }
-  .glow-purple  { box-shadow: 0 0 12px rgba(124,110,245,.25); }
+  .glow-purple { box-shadow: 0 0 12px rgba(124,110,245,.25); }
+
   .text-gradient {
     background: linear-gradient(135deg, #00d4aa, #7c6ef5);
     -webkit-background-clip: text;
@@ -78,7 +113,13 @@
     content: '';
     position: absolute;
     inset: 0;
-    background: repeating-linear-gradient(0deg, transparent, transparent 2px, rgba(0,0,0,.03) 2px, rgba(0,0,0,.03) 4px);
+    background: repeating-linear-gradient(
+      0deg,
+      transparent,
+      transparent 2px,
+      rgba(0,0,0,.03) 2px,
+      rgba(0,0,0,.03) 4px
+    );
     pointer-events: none;
     z-index: 1;
   }
@@ -96,5 +137,17 @@
 }
 
 /* Framer motion preset classes */
-.animate-fade-up { animation: fadeUp .4s ease forwards; }
-@keyframes fadeUp { from { opacity:0; transform: translateY(10px); } to { opacity:1; transform: translateY(0); } }
+.animate-fade-up {
+  animation: fadeUp .4s ease forwards;
+}
+
+@keyframes fadeUp {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
